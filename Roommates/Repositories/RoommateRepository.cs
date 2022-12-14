@@ -215,5 +215,83 @@ namespace Roommates.Repositories
                 }
             }
         }
+        public List<Roommate> MonthlyCost()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT FirstName First, 
+                                               CONVERT(int, 1000 * (CONVERT(float, RentPortion) / 100)) Rent
+                                        FROM Roommate
+                                        WHERE isCurrent = 1";
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<Roommate> roommates = new List<Roommate>();
+
+                        while (reader.Read())
+                        {
+                            int firstCol = reader.GetOrdinal("First");
+                            int rentCol = reader.GetOrdinal("Rent");
+
+                            Roommate newRoommate = new Roommate
+                            {
+                                FirstName = reader.GetString(firstCol),
+                                RentPortion = reader.GetInt32(rentCol)
+                            };
+
+                            roommates.Add(newRoommate);
+                        }
+
+                        return roommates;
+                    }
+                }
+            }
+        }
+        public List<Roommate> TotalCost()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT FirstName Name,
+                                               MoveInDate MoveIn, 
+                                               MoveOutDate MoveOut, 
+                                               isCurrent,
+											   CONVERT(int, 1000 * (CONVERT(float, RentPortion) / 100)) Rent
+                                        FROM Roommate";
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<Roommate> roommates = new List<Roommate>();
+
+                        while (reader.Read())
+                        {
+                            int nameCol = reader.GetOrdinal("Name");
+                            int moveInCol = reader.GetOrdinal("MoveIn");
+                            int moveOutCol = reader.GetOrdinal("MoveOut");
+                            int isCurrentCol = reader.GetOrdinal("isCurrent");
+
+                            string name = reader.GetString(nameCol);
+                            DateTime moveIn = reader.GetDateTime(moveInCol);
+                            DateTime moveOut = reader.GetInt32(isCurrentCol) == 1 ? default(DateTime) : reader.GetDateTime(moveOutCol);
+
+                            Roommate newRoommate = new Roommate
+                            {
+                                FirstName = name,
+                                MovedInDate = moveIn,
+                                MovedOutDate = moveOut,
+                                RentPortion = reader.GetInt32(reader.GetOrdinal("Rent"))
+                            };
+
+                            roommates.Add(newRoommate);
+                        }
+
+                        return roommates;
+                    }
+                }
+            }
+        }
     }
 }

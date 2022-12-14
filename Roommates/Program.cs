@@ -12,6 +12,7 @@ namespace Roommates
         //  We define it here as a constant since it will never change.
         private const string CONNECTION_STRING = @"server=localhost\SQLExpress;database=Roommates;integrated security=true;TrustServerCertificate=true;";
 
+        // I now see the importance of SOLID principles, and will do my best to follow them from now on
         static void Main(string[] args)
         {
             RoomRepository roomRepo = new RoomRepository(CONNECTION_STRING);
@@ -316,6 +317,26 @@ namespace Roommates
                         Console.Write("Press any key to continue");
                         Console.ReadKey();
                         break;
+                    case "Rent due each month (by person)":
+                        foreach(Roommate rM in roommateRepo.MonthlyCost())
+                        {
+                            Console.WriteLine($"{rM.FirstName}: ${rM.RentPortion}");
+                        }
+                        
+                        Console.WriteLine();
+                        Console.Write("Press any key to continue");
+                        Console.ReadKey();
+                        break;
+                    case "Total rent paid (by person)":
+                        foreach(Roommate rM in roommateRepo.TotalCost())
+                        {
+                            Console.WriteLine($"{rM.FirstName} - ${rM.TotalRent.ToString("N0")} | Current: {(rM.MovedOutDate == default(DateTime) ? "True" : "False")}");
+                        }
+
+                        Console.WriteLine();
+                        Console.Write("Press any key to continue");
+                        Console.ReadKey();
+                        break;
                     case ("Exit"):
                         runProgram = false;
                         break;
@@ -348,6 +369,8 @@ namespace Roommates
                 "List everyone's chores",
                 "Former roommates",
                 "Days of residency",
+                "Rent due each month (by person)",
+                "Total rent paid (by person)",
                 "Exit"
             };
 
